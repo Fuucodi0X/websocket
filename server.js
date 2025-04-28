@@ -1,9 +1,10 @@
 // websocket-server.js
+import 'dotenv/config'
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import express from 'express';
 
-const PORT = process.env.WS_PORT || 3005; // Choose a port (e.g., 3001)
+const PORT = process.env.WS_PORT; // Choose a port (e.g., 3001)
 const app = express();
 const httpServer = createServer(app);
 
