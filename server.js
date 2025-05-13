@@ -33,15 +33,21 @@ io.on('connection', (socket) => {
 app.post('/api/internal/broadcast-scan', (req, res) => {
   try {
     const scanData = req.body;
-    if (!scanData || !scanData.personnelData) { // Check for expected data
+    if (!scanData || !scanData.nfc_id || !scanData.device_id) { // Check for expected data
       console.error("[WS Server] Invalid data received for broadcast:", scanData);
       return res.status(400).json({ message: 'Invalid scan data received' });
     }
 
-    console.log(`[WS Server] Received scan via HTTP, broadcasting 'scanUpdate' for user: ${scanData.personnelData.name}`);
+    console.log(`[WS Server] Received scan via HTTP, broadcasting 'scanUpdate' for id: ${scanData.nfc_id}`);
 
     // *** Use io.emit() to broadcast to ALL connected clients ***
-    io.emit('scanUpdate', scanData);
+    if(scanData.device_id == "device_a") {
+      io.emit('admin_card_registration', scanData.nfc_id)
+    } else if (scanData.device_id == "device_b") {
+      io.emit('admin_card_link', scanData.nfc_id)
+    } else if (scanData.device_id == "device_c") {
+      io.emit('library', scanData.nfc_id)
+    }
 
     res.status(200).json({ success: true, message: 'Scan broadcasted successfully' });
   } catch (error) {
