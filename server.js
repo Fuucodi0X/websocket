@@ -20,6 +20,9 @@ const io = new Server(httpServer, {
 // Middleware to parse JSON bodies for the internal HTTP endpoint
 app.use(express.json());
 
+// Middleware to parse URL-encoded form data
+app.use(express.urlencoded({ extended: true }));
+
 // --- WebSocket Connection Handling ---
 io.on('connection', (socket) => {
   console.log(`[WS Server] Client connected: ${socket.id}`);
@@ -32,21 +35,23 @@ io.on('connection', (socket) => {
 // --- Internal HTTP Endpoint for API Route to Trigger Broadcast ---
 app.post('/api/internal/broadcast-scan', (req, res) => {
   try {
-    const scanData = req.body;
-    if (!scanData || !scanData.nfc_id || !scanData.device_id) { // Check for expected data
-      console.error("[WS Server] Invalid data received for broadcast:", scanData);
+    // Get the nfc_id and device_id from request body
+    const {nfc_id, device_id} = req.body;
+
+    if (!nfc_id || !device_id) { // Check for expected data
+      console.error("[WS Server] Invalid data received for broadcast:", nfc_id, device_id);
       return res.status(400).json({ message: 'Invalid scan data received' });
     }
 
-    console.log(`[WS Server] Received scan via HTTP, broadcasting 'scanUpdate' for id: ${scanData.nfc_id}`);
+    console.log(`[WS Server] Received scan via HTTP, broadcasting nfc_id: ${nfc_id} from device_id: ${device_id}`);
 
     // *** Use io.emit() to broadcast to ALL connected clients ***
-    if(scanData.device_id == "SM-N950U" || "SM-N950U") {
-      io.emit('admin_card_registration', scanData.nfc_id)
-    } else if (scanData.device_id == "device_b") {
-      io.emit('admin_card_link', scanData.nfc_id)
-    } else if (scanData.device_id == "device_c") {
-      io.emit('library', scanData.nfc_id)
+    if(device_id == "device_a" || "SM-N950U") {
+      io.emit('admin_card_registration', nfc_id)
+    } else if (device_id == "device_b") {
+      io.emit('admin_card_link', nfc_id)
+    } else if (device_id == "device_c") {
+      io.emit('library', nfc_id)
     }
 
     res.status(200).json({ success: true, message: 'Scan broadcasted successfully' });
