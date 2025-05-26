@@ -46,7 +46,7 @@ app.post('/api/internal/broadcast-scan', (req, res) => {
     console.log(`[WS Server] Received scan via HTTP, broadcasting nfc_id: ${nfc_id} from device_id: ${device_id}`);
 
     // *** Use io.emit() to broadcast to ALL connected clients ***
-    if(device_id == "device_a" || "SM-N950U") {
+    if(device_id == "device_a" || "SM-N950U" || "SM-N986N") {
       io.emit('admin_card_registration', nfc_id)
     } else if (device_id == "device_b") {
       io.emit('admin_card_link', nfc_id)
